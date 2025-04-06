@@ -18,17 +18,4 @@ app.listen(port, () => {
 
 dbConnect();
 
-/*  
-
-status codes
-============
-
-200 => ok
-201 => created
-400 => bad request
-500 => internal server error
-403 => unathorized access
-
-*/
-
 app.use("/api", router);

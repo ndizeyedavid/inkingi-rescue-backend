@@ -78,6 +78,98 @@ const usersController = {
                 .json({ message: "Failed to login", error: err.message });
         }
     },
+
+    // password auths
+    async changePassword(req, res) {
+        try {
+            const { user_id, oldPassword, newPassword } = req.body;
+            if (!oldPassword || !newPassword) {
+                return res.status(400).json({ message: "All fields are required" });
+            }
+            const user = await Users.findById(user_id);
+            if (!user) {
+                return res.status(400).json({ message: "User not found" });
+            }
+
+            const isMatch = compare(oldPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Invalid credentials" });
+            }
+            const hashedPassword = await encrypt(newPassword);
+
+            user.password = hashedPassword;
+            await user.save();
+            return res.status(200).json({ message: "Password changed" });
+        } catch (err) {
+            return res
+                .status(500)
+                .json({ message: "Failed to change password", error: err.message });
+        }
+    },
+
+    async getAllUsers(req, res) {
+        try {
+            const users = await Users.find();
+            users.map((user) => (user.password = undefined));
+
+            return res.status(200).json({ message: "Users fetched", data: users });
+        } catch (err) {
+            return res
+                .status(500)
+                .json({ message: "Failed to fetch users", error: err.message });
+        }
+    },
+    async getUser(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await Users.findById(id);
+            user.password = undefined;
+
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            return res.status(200).json({ message: "User fetched", data: user });
+        } catch (err) {
+            return res
+                .status(500)
+                .json({ message: "Failed to fetch user", error: err.message });
+        }
+    },
+    async updateUser(req, res) {
+        try {
+            const { id } = req.params;
+            const { fname, lname, email, phone, address } = req.body;
+
+            const user = await Users.findByIdAndUpdate(
+                id,
+                { fname, lname, email, phone, address },
+                { new: true }
+            );
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            user.password = undefined;
+            return res.status(200).json({ message: "User updated", data: user });
+        } catch (err) {
+            return res
+                .status(500)
+                .json({ message: "Failed to update user", error: err.message });
+        }
+    },
+    async deleteUser(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await Users.findByIdAndDelete(id);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            return res.status(200).json({ message: "User deleted", data: user });
+        } catch (err) {
+            return res
+                .status(500)
+                .json({ message: "Failed to delete user", error: err.message });
+        }
+    },
 };
 
 export default usersController;

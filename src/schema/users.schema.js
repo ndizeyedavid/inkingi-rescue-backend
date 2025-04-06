@@ -21,7 +21,7 @@ const userSchema = new Schema({
     },
     address: {
         type: Object,
-        required: true,
+        default: [0, 0],
     },
     password: {
         type: String,
@@ -33,6 +33,6 @@ const userSchema = new Schema({
     },
 });
 
-const Users = new model("Users", userSchema);
+const Users = model("Users", userSchema);
 
 export default Users;
