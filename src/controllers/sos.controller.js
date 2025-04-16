@@ -5,16 +5,27 @@ import Volunteer from "../schema/volunteers.schema.js";
 const sosController = {
     async createSos(req, res) {
         try {
-            const { user, title, sos_type, description, proof, location } = req.body;
-            if (!user || !title || !sos_type || !description || !proof || !location) {
+            const { user, title, sos_type, description, location } = req.body;
+            // Handle uploaded files
+            const proofs = req.files ? req.files.map((file) => file.path) : [];
+
+            if (
+                !user ||
+                !title ||
+                !sos_type ||
+                !description ||
+                !location ||
+                proofs.length === 0
+            ) {
                 return res.status(400).json({ message: "All fields are required" });
             }
+
             const sos = await Sos.create({
                 user,
                 title,
                 sos_type,
                 description,
-                proof,
+                proof: proofs, // Save array of file paths
                 location,
             });
 
@@ -184,11 +195,14 @@ const sosController = {
                 return res.status(400).json({ message: "All fields are required" });
             }
             const sos = await Sos.findById(id);
-
+            const isVolunteer = await Volunteer.find({
+                user: user,
+                sos_id: id,
+            });
             if (!sos) {
                 return res.status(404).json({ message: "SOS not found" });
             }
-            if (sos.volunteers.includes(user)) {
+            if (!isVolunteer) {
                 return res.status(400).json({ message: "User already volunteered" });
             }
 

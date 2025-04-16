@@ -19,7 +19,7 @@ const sosSchema = new Schema({
         required: true,
     },
     proof: {
-        type: String,
+        type: Array,
         required: true,
     },
     location: {
