@@ -1,5 +1,7 @@
+// import { sendMsg } from "../helpers/send.sms.js";
 import Comment from "../schema/comment.schema.js";
 import Sos from "../schema/sos.schema.js";
+// import Users from "../schema/users.schema.js";
 import Volunteer from "../schema/volunteers.schema.js";
 
 const sosController = {
@@ -25,13 +27,22 @@ const sosController = {
                 title,
                 sos_type,
                 description,
-                proof: proofs, // Save array of file paths
+                proof: proofs,
                 location,
             });
 
-            return res
-                .status(201)
-                .json({ message: "SOS posted successfully", data: sos });
+            // TODO: send SMS to all users
+            // const users = await Users.find();
+            // const phoneNumbers = users.map((user) => user.phone);
+
+            // const sos_message = `${user.fname} is reporting an ${sos_type} incidence, title: ${title} && description: ${description}`;
+            // const sms_broadcast = await sendMsg(phoneNumbers, sos_message);
+
+            return res.status(201).json({
+                message: "SOS posted successfully",
+                data: sos,
+                // SMS_STATUS: sms_broadcast,
+            });
         } catch (err) {
             return res
                 .status(500)
@@ -42,6 +53,7 @@ const sosController = {
     async getAllSos(req, res) {
         try {
             const sos = await Sos.find()
+                .sort({ postDate: -1 })
                 .populate({
                     path: "user",
                     model: "Users",
